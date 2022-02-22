@@ -1,0 +1,9 @@
+{
+  "factions": ["Policja", "Wojsko", "Cywil"],
+  "tasks": {
+    "Forensic": {},
+    "Python": {},
+    "Reverse": {},
+    "Other": {}
+  }
+}
