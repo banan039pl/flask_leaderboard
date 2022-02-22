@@ -1,6 +1,7 @@
+from files_lib import SHA256
 from main import db, User, Submission
 
-u = User(username="karje1", password = "karje1")
+u = User(username="karje1", password = SHA256("karje1"))
 db.session.add(u)
 db.session.commit()
 

@@ -14,6 +14,7 @@ from flask_admin.model import BaseModelView
 
 from sklearn.metrics import mean_absolute_error
 
+from files_lib import SHA256
 from forms import LoginForm, RegisterForm
 from config import Config
 from scorer import Scorer, create_folder
@@ -22,7 +23,7 @@ from scorer import Scorer, create_folder
 
 ## Leaderboard parameter
 limit_lb = 100 # Number of user showed at leaderboard table
-greater_better = False # True if lowest score is the best; False if greatest score is the best
+greater_better = True # True if lowest score is the best; False if greatest score is the best
 metric = mean_absolute_error #change the metric using sklearn function
 scorer = Scorer(public_path='./master_key/public_key.csv',
                 private_path='./master_key/private_key.csv',
@@ -61,7 +62,7 @@ class User(UserMixin, db.Model):
         return self.username
 
     def check_password(self, password): ## Too lazy to make it hash
-        return self.password == password
+        return SHA256(password) == self.password
 
 class Submission(db.Model):
     __tablename__ = "submission"
@@ -161,7 +162,7 @@ def register_page():
             print(user)
             if user is None: # only when user is not registered then proceed
                 print("HALOOO")
-                u = User(username=reg_form.username.data, password=reg_form.password.data, faction=reg_form.faction.data)
+                u = User(username=reg_form.username.data, password=SHA256(reg_form.password.data), faction=reg_form.faction.data)
                 db.session.add(u)
                 db.session.commit()
                 # flash('Congratulations, you are now a registered user!')
