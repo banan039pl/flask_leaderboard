@@ -54,6 +54,11 @@
                         <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
 
+                        {{ reg_form.faction() }}
+                        {% for error in reg_form.faction.errors %}
+                        <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
+
                         {{ reg_form.submit() }}
                     </div>
                     <h3>{{ registration_status }}</h3>

@@ -1,6 +1,13 @@
-import pandas as pd 
+import os
+import pathlib
+
+import pandas as pd
 
 from sklearn.metrics import mean_squared_error
+
+def create_folder(dirr):
+    """Create directory given directory. Parent directories are created as well if don't exist. If directory already exists then function does nothing"""
+    pathlib.Path(dirr).mkdir(parents=True, exist_ok=True)
 
 class Scorer():
     def __init__(self, public_path = './master_key/public_key.csv', 
@@ -13,6 +20,7 @@ class Scorer():
         self.df_private_key = pd.read_csv(self.private_path)
         
     def calculate_score(self, submission_path, submission_type = 'public'):
+        return ("SUBMISSION SUCCESS", 1.0)
         df_submission = pd.read_csv(submission_path)
 
         if submission_type == 'private':

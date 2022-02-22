@@ -16,7 +16,7 @@ from sklearn.metrics import mean_absolute_error
 
 from forms import LoginForm, RegisterForm
 from config import Config
-from scorer import Scorer
+from scorer import Scorer, create_folder
 
 # PARAMETER
 
@@ -24,9 +24,9 @@ from scorer import Scorer
 limit_lb = 100 # Number of user showed at leaderboard table
 greater_better = False # True if lowest score is the best; False if greatest score is the best
 metric = mean_absolute_error #change the metric using sklearn function
-scorer = Scorer(public_path = './master_key/public_key.csv', 
-                private_path = './master_key/private_key.csv', 
-                metric = metric) #change the metric using sklearn function
+scorer = Scorer(public_path='./master_key/public_key.csv',
+                private_path='./master_key/private_key.csv',
+                metric=metric) #change the metric using sklearn function
 
 ## Upload parameter
 UPLOAD_FOLDER = 'submissions'
@@ -34,7 +34,7 @@ ALLOWED_EXTENSIONS = {'csv'} # only accept csv files
 
 ## FLASK configuration
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 # 2 Megabytes
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 # 10 Megabytes
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'my'
 app.config.from_object(Config)
@@ -55,6 +55,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     password = db.Column(db.String(128)) ## Too lazy to make it hash
+    faction = db.Column(db.String(64))
 
     def __repr__(self):
         return self.username
@@ -70,6 +71,7 @@ class Submission(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User')
     score = db.Column(db.Float)
+
 
     def __repr__(self):
         return f'<User ID {self.user_id} score {self.score}>'
@@ -118,18 +120,20 @@ admin.add_view(SubmissionView(Submission, db.session))
 def get_leaderboard(greater_better, limit, submission_type = 'public'):
 
     if greater_better:
-        score_agg = "MAX"
+        score_agg = "SUM"
+        #score_agg = "MAX"
         score_sorting = "DESC"
 
     else:
 
         score_agg = "MIN"
         score_sorting = "ASC"
-
+    #{score_agg}(submission.score) as score,
     query = f"""
             SELECT
             user.username, 
-            {score_agg}(submission.score) as score,
+            user.faction,
+            SUM(submission.score) as score,
             count(submission.id) as total_submission,
             max(timestamp) as last_sub
             FROM submission 
@@ -157,7 +161,7 @@ def register_page():
             print(user)
             if user is None: # only when user is not registered then proceed
                 print("HALOOO")
-                u = User(username=reg_form.username.data, password = reg_form.password.data)
+                u = User(username=reg_form.username.data, password=reg_form.password.data, faction=reg_form.faction.data)
                 db.session.add(u)
                 db.session.commit()
                 # flash('Congratulations, you are now a registered user!')
@@ -187,12 +191,14 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET', 'POST'])
 def home_page():
+    subject_type = request.form.get("subject_type", "misc")
+    task = request.form.get("task", "Zad1")
     login_form = LoginForm()
     login_status = request.args.get("login_status", "")
     submission_status = request.args.get("submission_status", "")
 
-    leaderboard = get_leaderboard(greater_better = greater_better, limit = limit_lb, submission_type='public')
-    leaderboard_private = get_leaderboard(greater_better = greater_better, limit = limit_lb, submission_type='private')
+    leaderboard = get_leaderboard(greater_better=greater_better, limit = limit_lb, submission_type='public')
+    leaderboard_private = get_leaderboard(greater_better=greater_better, limit=limit_lb, submission_type='private')
 
     if request.method == 'POST': # If upload file / Login
         ### LOGIN 
@@ -220,26 +226,33 @@ def home_page():
             submission_file = request.files['uploadfile']
             #throw error if extension is not allowed
             if not allowed_file(submission_file.filename):
-                raise Exception('Invalid file extension')
-            
+                #raise Exception('Invalid file extension')
+                print('Invalid file extension')
+
             if submission_file and allowed_file(submission_file.filename):
 
-                filename = secure_filename(submission_file.filename)
-
-                target_dir = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id))
-                if not os.path.exists(target_dir):
-                    os.makedirs(target_dir)
-                
-                fullPath = os.path.join(app.config['UPLOAD_FOLDER'], str(current_user.id) , filename)
-                submission_file.save(fullPath)
+                filename_original = secure_filename(submission_file.filename)
+                if '.' in filename_original:
+                    ext = '.' + filename_original.split('.')[-1]
+                else:
+                    ext = ''
+                filename = secure_filename(task)
+                fullPath = os.path.join(app.config['UPLOAD_FOLDER'], subject_type, task, str(current_user.id), filename) + ext
+                dirname = os.path.dirname(fullPath)
+                #dirname = os.path.join(app.config['UPLOAD_FOLDER'], subject_type, str(current_user.id))
+                create_folder(dirname)
+                if os.path.exists(fullPath):
+                    return redirect(url_for('home_page', submission_status='SUBMISSION_ALREADY_EXISTS!'))
+                else:
+                    submission_file.save(fullPath)
 
                 submission_type = request.form.get('submission_type', "public")
-                result = scorer.calculate_score(submission_path = fullPath, submission_type = submission_type)
+                result = scorer.calculate_score(submission_path=fullPath, submission_type=submission_type)
                 submission_status = result[0]
                 if submission_status == "SUBMISSION SUCCESS":
                     score = result[1]
                     score = round(score, 3)
-                    s = Submission(user_id=current_user.id , score=score, submission_type = submission_type)
+                    s = Submission(user_id=current_user.id, score=score, submission_type=submission_type)
                     db.session.add(s)
                     db.session.commit()
                     print(f"submitted {score}")
@@ -249,14 +262,13 @@ def home_page():
                 return redirect(url_for('home_page', submission_status = submission_status))
             
     return render_template('index.html', 
-                        leaderboard = leaderboard,
-                        leaderboard_private = leaderboard_private,
+                        leaderboard=leaderboard,
+                        leaderboard_private=leaderboard_private,
                         login_form=login_form, 
                         login_status=login_status,
                         submission_status=submission_status
     )
 
 if __name__ == '__main__':
-    print('Hello World')
     app.debug = True
-    app.run(host = '0.0.0.0',port=5005)
+    app.run(host='0.0.0.0',port=5005)

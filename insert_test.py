@@ -1,6 +1,6 @@
 from main import db, User, Submission
 
-u = User(username="karje", password = "karje")
+u = User(username="karje1", password = "karje1")
 db.session.add(u)
 db.session.commit()
 

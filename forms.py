@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 
 class LoginForm(FlaskForm):
@@ -11,6 +11,7 @@ class LoginForm(FlaskForm):
 class RegisterForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()], render_kw={"placeholder": "username"})
     password = PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "password"})
+    faction = SelectField('Faction', choices=["Policja", "Wojsko", "Cywil"], validators=[DataRequired()], render_kw={"placeholder": "faction"})
     submit = SubmitField('Register') 
 
     # def validate_username(self, username):

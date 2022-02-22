@@ -80,9 +80,22 @@
             <div class="col uploadform">
                 <h2>welcome back {{ current_user.username }}! </h2>
                 <h3>Upload</h3>
-                <form action="" method=post enctype=multipart/form-data> <select name=submission_type>
-                    <option value="public">public</option>
-                    <option value="private">private</option>
+                <form action="" method=post enctype=multipart/form-data>
+                    <select name=subject_type>
+                        <option value="Forensic">Forensic</option>
+                        <option value="Reverse">Reverse</option>
+                        <option value="Python">Python</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <select name=task>
+                        <option value="Zad1">Zad1</option>
+                        <option value="Zad2">Zad2</option>
+                        <option value="Zad3">Zad3</option>
+                        <option value="Zad4">Zad4</option>
+                    </select>
+                    <select name=submission_type>
+                        <option value="public">public</option>
+                        <option value="private">private</option>
                     </select>
                     <input type=file name=uploadfile>
                     <input type=submit value=Upload>
@@ -117,6 +130,7 @@
                 <tr>
                     <th scope="row">{{ ix | int + 1 }}</th>
                     <td>{{ row.username}}</td>
+                    <td>{{ row.faction}}</td>
                     <td>{{ row.score }}</td>
                     <td>{{ row.total_submission}}</td>
                     <td>{{ row.last_sub}}</td>
