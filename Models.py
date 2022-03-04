@@ -13,6 +13,7 @@ app = Flask(__name__)
 db = SQLAlchemy(app)
 
 class User(UserMixin, db.Model):
+    """Table for users, their factions and hashed passwords"""
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -26,6 +27,7 @@ class User(UserMixin, db.Model):
         return SHA256(password) == self.password
 
 class Submission(db.Model):
+    """"Table which stores users submissions and scores"""
     __tablename__ = "submission"
     id = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, index=True, default=dt.datetime.now)
@@ -39,6 +41,7 @@ class Submission(db.Model):
         return f'<User ID {self.user_id} score {self.score}>'
 
 class Results(db.Model):
+    """Table which stores hashed flags for CTF tasks for each subject_type"""
     __tablename__ = "results"
     id = db.Column(db.Integer, primary_key=True)
     subject_type = db.Column(db.String(64))
@@ -54,7 +57,7 @@ class MyAdminIndexView(AdminIndexView):
         if current_user.is_authenticated:
             return current_user.username == 'admin'
         else:
-            False
+            return False
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('home_page'))
@@ -66,7 +69,7 @@ class UserView(ModelView):
         if current_user.is_authenticated:
             return current_user.username == 'admin'
         else:
-            False
+            return False
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('home_page'))
 
@@ -77,7 +80,19 @@ class SubmissionView(ModelView):
         if current_user.is_authenticated:
             return current_user.username == 'admin'
         else:
-            False
+            return False
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('home_page'))
+
+class ResultsView(ModelView):
+    column_list = (Results.id, 'subject_type', 'task', 'flag')
+
+    def is_accessible(self):
+        if current_user.is_authenticated:
+            return current_user.username == 'admin'
+        else:
+            return False
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('home_page'))

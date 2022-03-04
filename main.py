@@ -37,7 +37,7 @@ ALLOWED_EXTENSIONS = {'csv', 'txt'} # only accept csv files
 
 ## FLASK configuration
 app = Models.app
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 # 10 Megabytes
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 # 10 Megabytes
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SECRET_KEY'] = 'my'
 app.config.from_object(Config)
@@ -57,7 +57,7 @@ db.create_all()
 admin = Admin(app, index_view=Models.MyAdminIndexView())
 admin.add_view(Models.UserView(User, db.session))
 admin.add_view(Models.SubmissionView(Submission, db.session))
-
+admin.add_view(Models.ResultsView(Results, db.session))
 # Leader Board
 
 
@@ -130,6 +130,5 @@ def home_page():
                         )
 
 if __name__ == '__main__':
-
     app.debug = True
     app.run(host='0.0.0.0',port=5005)
