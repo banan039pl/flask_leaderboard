@@ -5,6 +5,10 @@ import pandas as pd
 
 from sklearn.metrics import mean_squared_error
 
+from files_lib import SHA256
+from Models import Results
+
+
 def create_folder(dirr):
     """Create directory given directory. Parent directories are created as well if don't exist. If directory already exists then function does nothing"""
     pathlib.Path(dirr).mkdir(parents=True, exist_ok=True)
@@ -19,33 +23,14 @@ class Scorer():
         self.df_public_key = pd.read_csv(self.public_path)
         self.df_private_key = pd.read_csv(self.private_path)
         
-    def calculate_score(self, submission_path, submission_type = 'public'):
-        return ("SUBMISSION SUCCESS", 1.0)
-        df_submission = pd.read_csv(submission_path)
-
-        if submission_type == 'private':
-            df_key = self.df_private_key
-        else: 
-            df_key = self.df_public_key
-
-        # if input length not same, return None
-        if len(df_key) != len(df_submission):
-            print(len(df_key), len(df_submission))
-            return ("NOT SAME LENGTH", None)
-        
-        df_merged = df_key.merge(df_submission, how ='inner', 
-                                left_on='data_id', right_on='data_id', # adjust `on` columns as params
-                                suffixes=('_key', '_submission')) 
-        # When submission and key have different index value
-        if len(df_key) != len(df_merged):
-            return ("NOT SAME INDEX", None)
-
-        # data size is same, time to get score
-        y_key = df_merged['prediction_key']
-        y_submission = df_merged['prediction_submission']
-
-        if y_submission.isna().sum() > 0:
-            return ("SUBMISSION HAS NULL VALUE", None)
-
-        score = self.metric(y_key, y_submission)
-        return ("SUBMISSION SUCCESS", score)
+    def calculate_score(self, ctf_flag, submission_path, subject_type, task, submission_type = 'public'):
+        #return ("SUBMISSION SUCCESS", 1.0)
+        # Save the flag locally
+        with open(submission_path, 'w') as f:
+            f.write(ctf_flag.strip())
+        ctf_flag_hashed = SHA256(ctf_flag.strip())
+        hashed_flag = Results.query.filter_by(task=task,subject_type=subject_type,flag=ctf_flag_hashed).first()
+        if hashed_flag is None:
+            return ("WRONG_ANSWER", 0.0)
+        else:
+            return ("SUBMISSION SUCCESS", 1.0)

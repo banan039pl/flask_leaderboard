@@ -44,7 +44,7 @@
 
     <div class="jumbotron" style="background:#1f6794;color:#fff">
         <div class="container">
-            <h2 class="display-3">Simple Leaderboard</h2>
+            <h2 class="display-3">FWC Leaderboard</h2>
 
 
 
@@ -97,7 +97,8 @@
                         <option value="public">public</option>
                         <option value="private">private</option>
                     </select>
-                    <input type=file name=uploadfile>
+                    <input id=ctf_flag name="ctf_flag" placeholder="CTF">
+                    <!--<input type=file name=uploadfile> -->
                     <input type=submit value=Upload>
                 </form>
                 <p>{{ submission_status }}</p>
