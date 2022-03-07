@@ -35,6 +35,9 @@ class Submission(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User')
     score = db.Column(db.Float)
+    subject_type = db.Column(db.String(64))
+    task = db.Column(db.String(64))
+    submission_status = db.Column(db.String(64))
 
 
     def __repr__(self):
@@ -74,7 +77,7 @@ class UserView(ModelView):
         return redirect(url_for('home_page'))
 
 class SubmissionView(ModelView):
-    column_list = (Submission.id, 'submission_type', 'user_id', 'user',  'timestamp', 'score')
+    column_list = (Submission.id, 'submission_type', 'user_id', 'user',  'timestamp', 'score', 'subject_type', 'task', 'submission_status')
 
     def is_accessible(self):
         if current_user.is_authenticated:

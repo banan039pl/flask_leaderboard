@@ -108,11 +108,21 @@ def home_page():
                 #return redirect(url_for('home_page', submission_status='SUBMISSION_ALREADY_EXISTS!'))
             print(fullPath, ctf_flag)
             submission_type = request.form.get('submission_type', "public")
-            result = scorer.calculate_score(ctf_flag=ctf_flag, submission_path=fullPath, subject_type=subject_type, task=task, submission_type=submission_type)
+            result = scorer.calculate_score(ctf_flag=ctf_flag,
+                                            submission_path=fullPath,
+                                            subject_type=subject_type,
+                                            task=task,
+                                            submission_type=submission_type,
+                                            user_id=current_user.id)
             submission_status = result[0]
             if submission_status == "SUBMISSION SUCCESS":
                 score = round(result[1], 3)
-                s = Submission(user_id=current_user.id, score=score, submission_type=submission_type)
+                s = Submission(user_id=current_user.id,
+                               score=score,
+                               submission_type=submission_type,
+                               subject_type=subject_type,
+                               task=task,
+                               submission_status=submission_status)
                 db.session.add(s)
                 db.session.commit()
                 print(f"submitted {score}")
@@ -128,7 +138,14 @@ def home_page():
                         login_status=login_status,
                         submission_status=submission_status
                         )
+def add_test_flag():
+    r = Results(subject_type='Forensic',
+                task='Zad1',
+                flag=SHA256('CTF'))
+    db.session.add(r)
+    db.session.commit()
 
 if __name__ == '__main__':
+    add_test_flag()
     app.debug = True
     app.run(host='0.0.0.0',port=5005)
