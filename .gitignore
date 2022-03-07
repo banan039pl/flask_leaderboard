@@ -111,3 +111,5 @@ master_key/*
 submissions/*
 temp_folder/*
 app.db
+send_to_server.sh
+connect_to_server.sh
