@@ -1,5 +1,5 @@
 {
-  "factions": ["Policja", "Wojsko", "Cywil"],
+  "factions": ["Stokrotka", "Tulipan", "Róża", "Fiołek", "Krokus"],
   "tasks": {
     "Forensic": {},
     "Python": {},

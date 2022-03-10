@@ -20,7 +20,7 @@ from files_lib import SHA256
 from forms import LoginForm, RegisterForm
 from config import Config
 from scorer import Scorer, create_folder
-from Models import User, Results, Submission, get_leaderboard
+from Models import User, Results, Submission, get_leaderboard, get_leaderboard_factions
 # PARAMETER
 
 ## Leaderboard parameter
@@ -84,11 +84,11 @@ def home_page():
     login_form = LoginForm()
     login_status = request.args.get("login_status", "")
     submission_status = request.args.get("submission_status", "")
-
+    submission_type = 'public'
 
     leaderboard = get_leaderboard(greater_better=greater_better, limit=limit_lb, submission_type='public')
     leaderboard_private = get_leaderboard(greater_better=greater_better, limit=limit_lb, submission_type='private')
-
+    leaderboard_factions = get_leaderboard_factions()
     if request.method == 'POST': # If upload file / Login
         ### LOGIN 
         if login_form.validate_on_submit():
@@ -107,7 +107,7 @@ def home_page():
                 pass
                 #return redirect(url_for('home_page', submission_status='SUBMISSION_ALREADY_EXISTS!'))
             print(fullPath, ctf_flag)
-            submission_type = request.form.get('submission_type', "public")
+            #submission_type = request.form.get('submission_type', "public")
             result = scorer.calculate_score(ctf_flag=ctf_flag,
                                             submission_path=fullPath,
                                             subject_type=subject_type,
@@ -132,6 +132,7 @@ def home_page():
             return redirect(url_for('home_page', submission_status=submission_status))
             
     return render_template('index.html', 
+                        leaderboard_factions=leaderboard_factions,
                         leaderboard=leaderboard,
                         leaderboard_private=leaderboard_private,
                         login_form=login_form, 
@@ -142,6 +143,10 @@ def add_test_flag():
     r = Results(subject_type='Forensic',
                 task='Zad1',
                 flag=SHA256('CTF'))
+    db.session.add(r)
+    r = Results(subject_type='Forensic',
+                task='Zad2',
+                flag=SHA256('CTF2'))
     db.session.add(r)
     db.session.commit()
 
