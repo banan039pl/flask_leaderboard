@@ -111,7 +111,7 @@
 
         </div>
     </div>
-
+    {% if current_user.is_authenticated %}
     <div class=container>
         <h2>Factions Leaderboard</h2>
          <table class="table table-hover table-striped" style="float: left;">
@@ -157,6 +157,7 @@
             </tbody>
         </table>
    </div>
+    {% endif %}
 
     {% if current_user.username == 'admin' %}
     <div class=container>
