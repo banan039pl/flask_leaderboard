@@ -13,4 +13,3 @@ SQLAlchemy
 urllib3
 Werkzeug
 WTForms
-uwsgi

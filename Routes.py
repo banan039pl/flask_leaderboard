@@ -1,6 +1,6 @@
 from flask import request, url_for, render_template
 from werkzeug.utils import redirect
-
+import pandas as pd
 from Models import User
 from files_lib import SHA256
 from forms import RegisterForm
@@ -53,3 +53,25 @@ def Logging_in(login_form, login_user):
     login_status = ""
     login_user(user, remember=login_form.remember_me.data)
     return redirect(url_for('home_page', login_status=login_status))
+
+
+def get_all_subject_types(db):
+    """Get all subject types and return as a list"""
+    query = """
+            SELECT DISTINCT subject_type 
+            FROM Results
+            """
+    df = pd.read_sql(query, db.session.bind)
+    return [col for col in df['subject_type']]
+
+def get_number_of_tasks_per_subject_type(db,subject_types=None):
+    """Return number of tasks for each subject type"""
+    if subject_types is None:
+        subject_types = get_all_subject_types(db)
+    query = """
+            SELECT  subject_type, COUNT(*)
+            FROM Results
+            GROUP BY subject_type
+            """
+    df = pd.read_sql(query, db.session.bind)
+    return df

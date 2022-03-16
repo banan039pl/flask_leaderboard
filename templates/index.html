@@ -82,19 +82,25 @@
                 <h2>welcome back {{ current_user.username }}! </h2>
                 <h3>Upload</h3>
                 <form action="" method=post enctype=multipart/form-data>
-                    <select name=subject_type>
-                        <option value="Forensic">Forensic</option>
-                        <option value="Reverse">Reverse</option>
-                        <option value="Python">Python</option>
-                        <option value="Other">Other</option>
+                    <select name=subject_type id="subject_type" >
+                        {% for ix, row in subject_types.iterrows() %}
+                            <option value={{row.subject_type}}>{{row.subject_type}}</option>
+                        {% endfor %}
                     </select>
+
+
+
+                    <!--
                     <select name=task>
-                        <option value="Zad1">Zad1</option>
-                        <option value="Zad2">Zad2</option>
-                        <option value="Zad3">Zad3</option>
-                        <option value="Zad4">Zad4</option>
+                        {% set n = 10 %}
+                        {% for i in range(1, n) %}
+                                <option value=Zad{{i|string}}>Zad{{i|string}}</option>
+                        {% endfor %}
                     </select>
-                    <input id=ctf_flag name="ctf_flag" placeholder="CTF">
+                    -->
+
+                    <input id=task_nr name="task" placeholder="Task" maxlength="2" size="3">
+                    <input id=ctf_flag name="ctf_flag" placeholder="CTF" size="30">
                     <!--<input type=file name=uploadfile> -->
                     <input type=submit value=Upload>
                 </form>

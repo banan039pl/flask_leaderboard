@@ -15,7 +15,7 @@ from flask_admin.model import BaseModelView
 from sklearn.metrics import mean_absolute_error
 
 import Models
-from Routes import register_route, Logging_in
+from Routes import register_route, Logging_in, get_all_subject_types, get_number_of_tasks_per_subject_type
 from files_lib import SHA256
 from forms import LoginForm, RegisterForm
 from config import Config
@@ -47,6 +47,7 @@ db = Models.db
 db.app = app
 migrate = Migrate(app, db)
 login = LoginManager(app)
+#subject_types = get_all_subject_types(Models.db)
 
 # Database Model
 @login.user_loader
@@ -96,8 +97,15 @@ def home_page():
         ### UPLOAD FILE
         if 'ctf_flag' in request.form.keys() and current_user.is_authenticated:
             print('Uploading CTF')
+
+            is_task_nr_correct = Results.query.filter_by(
+                task=task.strip(),
+                subject_type=subject_type
+            ).first()
+            if is_task_nr_correct is None:
+                redirect(url_for('home_page', submission_status='Invalid task number!'))
             ctf_flag = request.form['ctf_flag']
-            if not ctf_flag:
+            if ctf_flag == '' or ctf_flag is None:
                 return redirect(url_for('home_page', submission_status='SUBMISSION_MUST_NOT_BE_EMPTY!'))
             dirname = os.path.join(app.config['UPLOAD_FOLDER'], subject_type, task, str(current_user.id))
             fullPath = os.path.join(dirname, 'test.txt')
@@ -137,20 +145,14 @@ def home_page():
                         leaderboard_private=leaderboard_private,
                         login_form=login_form, 
                         login_status=login_status,
-                        submission_status=submission_status
+                        submission_status=submission_status,
+                        subject_types=get_number_of_tasks_per_subject_type(db, subject_types=None)
+                        #results_tab=Results.query.all()
                         )
-def add_test_flag():
-    r = Results(subject_type='Forensic',
-                task='Zad1',
-                flag=SHA256('CTF'))
-    db.session.add(r)
-    r = Results(subject_type='Forensic',
-                task='Zad2',
-                flag=SHA256('CTF2'))
-    db.session.add(r)
-    db.session.commit()
+
 
 if __name__ == '__main__':
-    add_test_flag()
+    #print(get_all_subject_types(db))
+    #print(get_number_of_tasks_per_subject_type(db, subject_types=None))
     app.debug = True
     app.run(host='0.0.0.0',port=5000)

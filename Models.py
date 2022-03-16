@@ -19,11 +19,12 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     password = db.Column(db.String(128)) ## Too lazy to make it hash
     faction = db.Column(db.String(64))
+    apikey = db.Column(db.String(64))
 
     def __repr__(self):
         return self.username
 
-    def check_password(self, password): ## Too lazy to make it hash
+    def check_password(self, password):
         return SHA256(password) == self.password
 
 class Submission(db.Model):
@@ -50,6 +51,7 @@ class Results(db.Model):
     subject_type = db.Column(db.String(64))
     task = db.Column(db.String(64))
     flag = db.Column(db.String(64))
+    points = db.Column(db.Integer)
 
     def __repr__(self):
         return f'<subject_type {self.subject_type} task {self.task}>'
@@ -66,7 +68,7 @@ class MyAdminIndexView(AdminIndexView):
         return redirect(url_for('home_page'))
 
 class UserView(ModelView):
-    column_list = (User.id, 'username','password')
+    column_list = (User.id, 'username','password', 'faction', 'apikey')
 
     def is_accessible(self):
         if current_user.is_authenticated:
@@ -89,7 +91,7 @@ class SubmissionView(ModelView):
         return redirect(url_for('home_page'))
 
 class ResultsView(ModelView):
-    column_list = (Results.id, 'subject_type', 'task', 'flag')
+    column_list = (Results.id, 'subject_type', 'task', 'flag', 'points')
 
     def is_accessible(self):
         if current_user.is_authenticated:
