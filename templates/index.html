@@ -47,7 +47,7 @@
 
     <div class="jumbotron" style="background:#1f6794;color:#fff">
         <div class="container">
-            <h2 class="display-3">FWC Leaderboard</h2>
+            <h2 class="display-3" style="text-align:center;">Forensic Winter Camp <br>1.7E6</h2>
 
 
 
@@ -81,7 +81,7 @@
             {% elif current_user.is_authenticated %}
 
             <div class="col uploadform">
-                <h2>welcome back {{ current_user.username }}! </h2>
+                <h2>welcome back {{ current_user.faction }}! </h2>
 
                 <h3>Upload</h3>
                 <form action="" method=post enctype=multipart/form-data>
@@ -215,13 +215,18 @@
             </thead>
             <tbody>
                 {% for ix, row in leaderboard.iterrows() %}
-                <tr>
-                    <th scope="row">{{ ix | int + 1 }}</th>
-                    <td>{{ row.faction}}</td>
-                    <td>{{ row.score }}</td>
-                    <td>{{ row.total_submission}}</td>
-                    <td>{{ row.last_sub}}</td>
-                </tr>
+                    <!-- Highlight the row of currently logged in user -->
+                    {% if row.faction == current_user.faction %}
+                    <tr style="border:solid 7px;border-color:#5865F2 #818FEA #818FEA #5865F2;">
+                    {% else %}
+                    <tr>
+                    {% endif %}
+                        <th scope="row">{{ ix | int + 1 }}</th>
+                        <td>{{ row.faction}}</td>
+                        <td>{{ row.score }}</td>
+                        <td>{{ row.total_submission}}</td>
+                        <td>{{ row.last_sub}}</td>
+                    </tr>
                 {% endfor %}
 
 
