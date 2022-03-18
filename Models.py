@@ -124,7 +124,7 @@ def get_leaderboard(greater_better, limit, submission_type = 'public'):
             ON user.id = submission.user_id
             WHERE submission_type = '{submission_type}'
             GROUP BY 1 
-            ORDER BY 2 {score_sorting}, 4
+            ORDER BY score DESC, last_sub ASC
             LIMIT {limit}
             """
     df = pd.read_sql(query, db.session.bind)
@@ -133,7 +133,7 @@ def get_leaderboard(greater_better, limit, submission_type = 'public'):
 def get_leaderboard_factions(limit=100):
     """Query the database for scores earned by each faction"""
     query = f"""
-            SELECT DISTINCT 
+            SELECT  
             user.faction,
             SUM(submission.score) as score
             FROM submission

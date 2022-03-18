@@ -112,5 +112,7 @@ submissions/*
 temp_folder/*
 app.db
 send_to_server.sh
+send_to_server_home.sh
 connect_to_server.sh
+connect_to_server_home.sh
 config_local.json

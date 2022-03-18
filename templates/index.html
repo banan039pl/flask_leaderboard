@@ -80,6 +80,25 @@
 
             <div class="col uploadform">
                 <h2>welcome back {{ current_user.username }}! </h2>
+                <!--<button onclick="show_apikey()">Show my virustotal api key</button>
+                <a class="btn waves-effect btn-md" onclick="show_apikey()" style="background:#9370DB;color:#fff" role="button" id="button_apikey">
+                    Show my virustotal api key
+                </a>
+                <script>
+                    function show_apikey() {
+                      var x = document.getElementById("div_apikey");
+                      if (x.style.display === "none") {
+                        x.style.display = "block";
+                        document.getElementById("button_apikey").innerHTML = "Hide my virustotal api key";
+                      } else {
+                        x.style.display = "none";
+                        document.getElementById("button_apikey").innerHTML = "Show my virustotal api key";
+                      }
+                    }
+                </script>
+                <div id="div_apikey" style="display: none">
+                    {{ current_user.apikey }}
+                </div>-->
                 <h3>Upload</h3>
                 <form action="" method=post enctype=multipart/form-data>
                     <select name=subject_type id="subject_type" >
@@ -119,6 +138,7 @@
     </div>
     {% if current_user.is_authenticated %}
     <div class=container>
+        <!--
         <h2>Factions Leaderboard</h2>
          <table class="table table-hover table-striped" style="float: left;">
                 <thead class="thead-dark">
@@ -137,6 +157,7 @@
             {% endfor %}
             </tbody>
         </table>
+        -->
         <h2>Public Leaderboard</h2>
         <table class="table table-hover table-striped" style="float: left;">
             <thead class="thead-dark">

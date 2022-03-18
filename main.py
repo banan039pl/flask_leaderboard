@@ -65,7 +65,8 @@ admin.add_view(Models.ResultsView(Results, db.session))
 # Route
 @app.route('/register', methods=['GET', 'POST'])
 def register_page():
-    return register_route(db)
+    return redirect(url_for('home_page'))
+    #return register_route(db)
 
 @app.route('/logout')
 def logout():
@@ -81,7 +82,7 @@ def allowed_file(filename):
 @app.route('/', methods=['GET', 'POST'])
 def home_page():
     subject_type = request.form.get("subject_type", "misc")
-    task = request.form.get("task", "")
+    #task = request.form.get("task", "")
     login_form = LoginForm()
     login_status = request.args.get("login_status", "")
     submission_status = request.args.get("submission_status", "")
@@ -97,24 +98,20 @@ def home_page():
         ### UPLOAD FILE
         if 'ctf_flag' in request.form.keys() and current_user.is_authenticated:
             print('Uploading CTF')
-
+            task = request.form['task']
+            task = task.strip()
             is_task_nr_correct = Results.query.filter_by(
-                task=task.strip(),
+                task=task,
                 subject_type=subject_type
             ).first()
-            if is_task_nr_correct is None:
-                redirect(url_for('home_page', submission_status='Invalid task number!'))
+            if is_task_nr_correct is None or not task.isnumeric():
+                return redirect(url_for('home_page', submission_status='Invalid task number!'))
             ctf_flag = request.form['ctf_flag']
             if ctf_flag == '' or ctf_flag is None:
                 return redirect(url_for('home_page', submission_status='SUBMISSION_MUST_NOT_BE_EMPTY!'))
             dirname = os.path.join(app.config['UPLOAD_FOLDER'], subject_type, task, str(current_user.id))
             fullPath = os.path.join(dirname, 'test.txt')
-            create_folder(dirname)
-            # If submission exists do...
-            if os.path.exists(fullPath):
-                pass
-                #return redirect(url_for('home_page', submission_status='SUBMISSION_ALREADY_EXISTS!'))
-            print(fullPath, ctf_flag)
+
             #submission_type = request.form.get('submission_type', "public")
             result = scorer.calculate_score(ctf_flag=ctf_flag,
                                             submission_path=fullPath,
@@ -154,5 +151,7 @@ def home_page():
 if __name__ == '__main__':
     #print(get_all_subject_types(db))
     #print(get_number_of_tasks_per_subject_type(db, subject_types=None))
+    #db.session.query(Submission).delete()
+    #db.session.commit()
     app.debug = True
     app.run(host='0.0.0.0',port=5000)
