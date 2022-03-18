@@ -69,9 +69,10 @@ def get_number_of_tasks_per_subject_type(db,subject_types=None):
     if subject_types is None:
         subject_types = get_all_subject_types(db)
     query = """
-            SELECT  subject_type, COUNT(*)
+            SELECT  subject_type, COUNT(*) as tasks_n
             FROM Results
             GROUP BY subject_type
             """
     df = pd.read_sql(query, db.session.bind)
     return df
+

@@ -114,7 +114,6 @@ def get_leaderboard(greater_better, limit, submission_type = 'public'):
     #{score_agg}(submission.score) as score,
     query = f"""
             SELECT
-            user.username, 
             user.faction,
             SUM(submission.score) as score,
             count(submission.id) as total_submission,

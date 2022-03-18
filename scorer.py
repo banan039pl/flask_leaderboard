@@ -32,9 +32,6 @@ class Scorer():
                                              submission_status='SUBMISSION SUCCESS'
                                             ).first()
         if is_solved is None: # Task was not solved yet
-            # Save the flag locally
-            # with open(submission_path, 'w') as f:
-            #    f.write(ctf_flag.strip())
             ctf_flag_hashed = SHA256(ctf_flag)
             # Compare hashed flag to the hashed flag in the database
             hashed_flag = Results.query.filter_by(
@@ -48,4 +45,7 @@ class Scorer():
             else:
                 return "SUBMISSION SUCCESS", hashed_flag.points
         else:
-            return "SUBMISSION ALREADY SOLVED", None
+            submission_status = "SUBMISSION ALREADY SOLVED\n{" + subject_type.upper() + \
+                                "}{TASK: " + str(task) + "}" + \
+                                "\n\nPLEASE SOLVE ANOTHER TASK!"
+            return submission_status, None

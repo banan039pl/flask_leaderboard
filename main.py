@@ -112,7 +112,6 @@ def home_page():
             dirname = os.path.join(app.config['UPLOAD_FOLDER'], subject_type, task, str(current_user.id))
             fullPath = os.path.join(dirname, 'test.txt')
 
-            #submission_type = request.form.get('submission_type', "public")
             result = scorer.calculate_score(ctf_flag=ctf_flag,
                                             submission_path=fullPath,
                                             subject_type=subject_type,
@@ -131,9 +130,14 @@ def home_page():
                 db.session.add(s)
                 db.session.commit()
                 print(f"submitted {score}")
-                submission_status =  f"SUBMISSION SUCCESS | Score: {round(score,3)}"
+                # submission_status =  f"SUBMISSION SUCCESS | Score: {round(score,3)}"
+                submission_status = "SUBMISSION SUCCESS\nYOU SOLVED\n{" + subject_type.upper() + \
+                                    "}\n{TASK: " + str(task) + "}\n{SCORE: " + str(score) +\
+                                    "}\n\nCONGRATULATIONS!"
             elif submission_status=="WRONG_ANSWER":
-                submission_status = f"WRONG ANSWER | SCORE: 0.0"
+                submission_status = "SUBMISSION FAILED\nWRONG ANSWER\n{" + subject_type.upper() + \
+                                    "}{TASK: " + str(task) + "}" + \
+                                    "\n\nPLEASE TRY AGAIN!"
             return redirect(url_for('home_page', submission_status=submission_status))
             
     return render_template('index.html', 

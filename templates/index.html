@@ -7,12 +7,14 @@
     {% else %}
     <title>Competition Leaderoard</title>
     {% endif %}
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
     <!-- Bootstrap core CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet">
     <!-- Material Design Bootstrap -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.3/css/mdb.min.css" rel="stylesheet">
+    <link rel="stylesheet"  href="{{ url_for('static', filename='css/popup.css') }}">
 
 </head>
 
@@ -80,50 +82,71 @@
 
             <div class="col uploadform">
                 <h2>welcome back {{ current_user.username }}! </h2>
-                <!--<button onclick="show_apikey()">Show my virustotal api key</button>
-                <a class="btn waves-effect btn-md" onclick="show_apikey()" style="background:#9370DB;color:#fff" role="button" id="button_apikey">
-                    Show my virustotal api key
-                </a>
-                <script>
-                    function show_apikey() {
-                      var x = document.getElementById("div_apikey");
-                      if (x.style.display === "none") {
-                        x.style.display = "block";
-                        document.getElementById("button_apikey").innerHTML = "Hide my virustotal api key";
-                      } else {
-                        x.style.display = "none";
-                        document.getElementById("button_apikey").innerHTML = "Show my virustotal api key";
-                      }
-                    }
-                </script>
-                <div id="div_apikey" style="display: none">
-                    {{ current_user.apikey }}
-                </div>-->
+
                 <h3>Upload</h3>
                 <form action="" method=post enctype=multipart/form-data>
-                    <select name=subject_type id="subject_type" >
+
+                    <select name=subject_type id="subject_type"  onchange="jsUpdateTasks()">
+                        <option value="Subject">Subject</option>
                         {% for ix, row in subject_types.iterrows() %}
                             <option value={{row.subject_type}}>{{row.subject_type}}</option>
                         {% endfor %}
                     </select>
+                    <select name=task id="task">
 
-
-
-                    <!--
-                    <select name=task>
-                        {% set n = 10 %}
-                        {% for i in range(1, n) %}
-                                <option value=Zad{{i|string}}>Zad{{i|string}}</option>
-                        {% endfor %}
                     </select>
-                    -->
 
-                    <input id=task_nr name="task" placeholder="Task" maxlength="2" size="3">
-                    <input id=ctf_flag name="ctf_flag" placeholder="CTF" size="30">
+                    <!--<input id=task_nr name="task" placeholder="Task" maxlength="2" size="3">-->
+                    <input id=ctf_flag name="ctf_flag" placeholder="CTF{Enter_Flag_Here}" size="30">
                     <!--<input type=file name=uploadfile> -->
-                    <input type=submit value=Upload>
+                    <input type=submit value=Send>
                 </form>
-                <p>{{ submission_status }}</p>
+
+                <script>
+                        function jsClearCombobox(selectElement)
+                        {
+                           let i, L = selectElement.options.length - 1;
+                           for(i = L; i >= 0; i--) {
+                              selectElement.remove(i);
+                           }
+                        }
+
+                        function jsAddItemToSelect(combobox_var, str_item)
+                        {
+                            var opt = document.createElement("option"); // Create the new element
+                            opt.value = str_item; // set the value
+                            opt.text = str_item; // set the text
+                            combobox_var.appendChild(opt); // add it to the select
+                        }
+
+                        function jsUpdateTasks()
+                        {
+                            var sub_types = document.getElementById("subject_type");
+                            var Tasks = document.getElementById("task");
+                            jsClearCombobox(Tasks);
+                            var cur_sub_type = sub_types.options[sub_types.selectedIndex].value;
+                            jsAddItemToSelect(Tasks, 'Task number')
+                            {% for ix, row in subject_types.iterrows() %}
+                                if (cur_sub_type == '{{ row.subject_type }}')
+                                {
+                                    {% set n = row.tasks_n|int + 1 %}
+                                    {% for i in range(1, n) %}
+                                        jsAddItemToSelect(Tasks, '{{i|string}}')
+                                    {% endfor %}
+                                }
+                            {% endfor %}
+                        }
+
+                        function jsDisplaySubStatus()
+                        {
+                            if ('{{submission_status}}' !== '')
+                            {
+                                alert('{{submission_status}}');
+                            }
+                        }
+
+                        jsUpdateTasks()
+                    </script>
 
             </div>
             {% endif %}
@@ -132,6 +155,28 @@
             {% if current_user.is_authenticated %}
             <a class="btn btn-success waves-effect btn-md" href="{{ url_for('logout') }}" role="button">Log Out
                 &raquo;</a>
+            {% endif %}
+
+
+            {% if submission_status != '' %}
+                {% if 'SUBMISSION SUCCESS' in submission_status %}
+                    {% set status_color = '#006400' %}
+                {% elif 'SUBMISSION ALREADY SOLVED' in submission_status %}
+                    {% set status_color = '#FFA500' %}
+                {% else %}
+                    {% set status_color = '#FF0000' %}
+                {% endif %}
+
+
+            <div id="popup1" class="overlay">
+                <div class="popup" >
+                    <h2 style="color:{{status_color}};font-weight:bold;white-space:pre-line;text-align:center;">
+                        {{submission_status}}
+                    </h2>
+                    <a class="close" href="/">×</a>
+
+                </div>
+            </div>
             {% endif %}
 
         </div>
@@ -172,7 +217,6 @@
                 {% for ix, row in leaderboard.iterrows() %}
                 <tr>
                     <th scope="row">{{ ix | int + 1 }}</th>
-                    <td>{{ row.username}}</td>
                     <td>{{ row.faction}}</td>
                     <td>{{ row.score }}</td>
                     <td>{{ row.total_submission}}</td>
